@@ -7,9 +7,9 @@ case $1 in
         --restart=unless-stopped \
         -d \
         -e TZ=Europe/Amsterdam \
-        -e INFLUXDB_URL="http://influxdb:8086"
-        -e P1_SERIAL_PATH="/dev/ttyUSB0"
-        --device /dev/ttyUSB0
+        -e INFLUXDB_URL="http://influxdb:8086" \
+        -e P1_SERIAL_PATH="/dev/ttyUSB0" \
+        --device /dev/ttyUSB0 \
         %NAME%
         ;;
     stop)

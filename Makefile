@@ -13,7 +13,5 @@ test:
 docker:
 	docker build -t $(NAME) . -f Dockerfile
 
-build: docker init
-
 init:
 	cat init.sh | sed -e 's/%NAME%/$(NAME)/' > $(NAME).sh
