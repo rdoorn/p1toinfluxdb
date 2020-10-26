@@ -43,14 +43,16 @@ func main() {
 		Name:        p1Path,
 		Baud:        9600,
 		ReadTimeout: 20,
-		Size:        8,
+		Size:        7,
 	}
 
+	log.Printf("Connecting to %+v", config)
 	stream, err := serial.OpenPort(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 	reader := bufio.NewReader(stream)
+	log.Println("setting up parser...")
 	parser := &Parser{
 		influxdb: influxdbhelper.New("telegraf"),
 	}
@@ -61,19 +63,22 @@ func main() {
 
 	for {
 		line, _ := reader.ReadString('\n')
-
 		parser.Parse(line)
 
 		select {
 		case <-sigterm:
 			log.Printf("Program killed by signal!")
 			return
+		default:
 		}
-
 	}
 }
 
 func (p *Parser) Parse(s string) {
+	if len(s) == 0 {
+		return
+	}
+	log.Printf("parsing line: %s\n", s)
 	if id, hasID := getObisReference(s); hasID {
 		p.obisReference = id
 	}
@@ -102,44 +107,39 @@ func (p *Parser) Parse(s string) {
 		p.data.DeliveredToClientGas = GetValue(s)
 	}
 
-	if s == "!" {
+	if s[0] == '!' {
 		log.Printf("Send Data: %+v", p.data)
 
 		// sent power collected to nuts
 		tags := map[string]string{
-			"source":    "dsmr",
-			"metric":    "kwh",
-			"type":      "electricity",
-			"direction": "sent",
+			"source": "dsmr",
+			"metric": "kwh",
+			"type":   "electricity",
 		}
 		fields := map[string]interface{}{
-			"low":  p.data.DeliveredByClientTariff1,
-			"high": p.data.DeliveredToClientTariff2,
+			"delivered_low":  p.data.DeliveredToClientTariff1,
+			"delivered_high": p.data.DeliveredToClientTariff2,
+			"returned_low":   p.data.DeliveredByClientTariff1,
+			"returned_high":  p.data.DeliveredByClientTariff2,
 		}
-
-		err := p.influxdb.Insert("nuts", tags, fields)
+		log.Printf("sending fields: %+v\n", fields)
+		err := p.influxdb.Insert("electricity2", tags, fields)
 		if err != nil {
 			log.Printf(err.Error())
 		}
 
-		// sent power received to nuts
-		tags["direction"] = "received"
-		fields = map[string]interface{}{
-			"low":  p.data.DeliveredToClientTariff1,
-			"high": p.data.DeliveredToClientTariff2,
-		}
-		err = p.influxdb.Insert("nuts", tags, fields)
-		if err != nil {
-			log.Printf(err.Error())
+		tags = map[string]string{
+			"source": "dsmr",
+			"metric": "m2",
+			"type":   "gas",
 		}
 
-		tags["direction"] = "received"
-		tags["metric"] = "m3"
-		tags["type"] = "gas"
 		fields = map[string]interface{}{
-			"gas": p.data.DeliveredToClientGas,
+			"delivered": p.data.DeliveredToClientGas,
 		}
-		err = p.influxdb.Insert("nuts", tags, fields)
+
+		log.Printf("sending fields: %+v\n", fields)
+		err = p.influxdb.Insert("gas2", tags, fields)
 		if err != nil {
 			log.Printf(err.Error())
 		}
@@ -163,7 +163,7 @@ func GetValue(s string) float64 {
 	if len(m) != 2 {
 		return 0
 	}
-	if f, err := strconv.ParseFloat(m[1], 32); err == nil {
+	if f, err := strconv.ParseFloat(m[1], 64); err == nil {
 		fmt.Printf("val: %f\n", f)
 		return f
 	}
@@ -190,3 +190,4 @@ func GetValue(s string) float64 {
   "phase_currently_returned_l3": null
 }
 */
+
