@@ -80,8 +80,7 @@ func (p *Parser) Parse(s string) {
 	if len(s) == 0 {
 		return
 	}
-	log.Printf("parsing line: %s\n", s)
-	log.Printf("parsing line: %+v\n", []byte(s))
+    //log.Printf("parsing line: %s\n", s)
 
 	if id, hasID := getObisReference(s); hasID {
 		p.obisReference = id
