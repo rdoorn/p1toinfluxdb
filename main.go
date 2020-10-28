@@ -44,6 +44,8 @@ func main() {
 		Baud:        9600,
 		ReadTimeout: 20,
 		Size:        7,
+		Parity:      serial.ParityEven,
+        StopBits:    1,
 	}
 
 	log.Printf("Connecting to %+v", config)
@@ -79,6 +81,8 @@ func (p *Parser) Parse(s string) {
 		return
 	}
 	log.Printf("parsing line: %s\n", s)
+	log.Printf("parsing line: %+v\n", []byte(s))
+
 	if id, hasID := getObisReference(s); hasID {
 		p.obisReference = id
 	}
@@ -123,7 +127,7 @@ func (p *Parser) Parse(s string) {
 			"returned_high":  p.data.DeliveredByClientTariff2,
 		}
 		log.Printf("sending fields: %+v\n", fields)
-		err := p.influxdb.Insert("electricity2", tags, fields)
+		err := p.influxdb.Insert("electricity", tags, fields)
 		if err != nil {
 			log.Printf(err.Error())
 		}
@@ -139,7 +143,7 @@ func (p *Parser) Parse(s string) {
 		}
 
 		log.Printf("sending fields: %+v\n", fields)
-		err = p.influxdb.Insert("gas2", tags, fields)
+		err = p.influxdb.Insert("gas", tags, fields)
 		if err != nil {
 			log.Printf(err.Error())
 		}
