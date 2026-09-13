@@ -118,6 +118,10 @@ func (p *Parser) Parse(s string) {
 	if s[0] == '!' {
 		log.Printf("Send Data: %+v", p.data)
 
+		if p.influxdb == nil {
+			return
+		}
+
 		// sent power collected to nuts
 		tags := map[string]string{
 			"source": "dsmr",
@@ -133,7 +137,7 @@ func (p *Parser) Parse(s string) {
 		log.Printf("sending fields: %+v\n", fields)
 		err := p.influxdb.Insert("electricity", tags, fields)
 		if err != nil {
-			log.Printf(err.Error())
+			log.Print(err.Error())
 		}
 
 		tags = map[string]string{
@@ -149,7 +153,7 @@ func (p *Parser) Parse(s string) {
 		log.Printf("sending fields: %+v\n", fields)
 		err = p.influxdb.Insert("gas", tags, fields)
 		if err != nil {
-			log.Printf(err.Error())
+			log.Print(err.Error())
 		}
 	}
 
