@@ -44,6 +44,8 @@ func main() {
 		Baud:        9600,
 		ReadTimeout: 20,
 		Size:        7,
+		Parity:      serial.ParityEven,
+		StopBits:    serial.Stop1,
 	}
 
 	log.Printf("Connecting to %+v", config)

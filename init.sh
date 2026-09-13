@@ -9,7 +9,7 @@ case $1 in
         -e TZ=Europe/Amsterdam \
         -e INFLUXDB_URL="http://influxdb:8086" \
         -e P1_SERIAL_PATH="/dev/ttyUSB0" \
-        --device /dev/ttyUSB0 \
+        --device /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AK43OI8Y-if00-port0:/dev/ttyUSB0 \
         %NAME%
         ;;
     stop)
