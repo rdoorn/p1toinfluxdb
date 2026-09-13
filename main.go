@@ -105,7 +105,12 @@ func (p *Parser) Parse(s string) {
 	case "1-0:2.7.0":
 		log.Printf("curr to: %s", s)
 		p.data.DeliveredByClientCurrent = GetValue(s)
+	case "0-1:24.2.1":
+		// DSMR 4/5 gas: 0-1:24.2.1(<timestamp>)(<value>*m3) on a single line
+		log.Printf("gas by: %s", s)
+		p.data.DeliveredToClientGas = GetValue(s)
 	case "0-1:24.3.0":
+		// DSMR 2.2 gas: value follows on the next line as (<value>)
 		log.Printf("gas by: %s", s)
 		p.data.DeliveredToClientGas = GetValue(s)
 	}
