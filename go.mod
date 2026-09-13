@@ -1,6 +1,6 @@
 module github.com/rdoorn/p1toinfluxdb
 
-go 1.25.5
+go 1.25
 
 require (
 	github.com/rdoorn/gohelper v0.1.0
